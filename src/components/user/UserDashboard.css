@@ -1,0 +1,122 @@
+button:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+#table-header {
+  background-color: #202020af;
+}
+
+#table-cell {
+  color: white;
+}
+
+.status-size {
+  font-size: 12px;
+}
+
+.container-fluid {
+  background-color: white;
+  min-height: 100%;
+}
+
+#searchbar {
+  height: 50px;
+}
+
+#Appbar,
+#primaryButton {
+  background-color: #202020;
+}
+
+#main {
+  height: 100%;
+}
+
+#navBar {
+  height: 100%;
+  width: 20%;
+  background-color: lightgray;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* Full viewport height */
+  width: 100%; /* Full viewport width */
+}
+
+.header {
+  background-color: #4caf50;
+  color: white;
+  text-align: center;
+  flex-shrink: 0; /* Prevents shrinking */
+}
+
+.main-container {
+  display: flex;
+  flex: 1; /* Fills remaining height */
+  width: 100%; /* Ensures full width */
+  overflow: hidden; /* Prevents overflow issues */
+  /* height: 100%; */
+}
+
+.nav {
+  background-color: white;
+  border-right: 0.5px solid lightgrey;
+  color: white;
+  width: 200px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.nav ul {
+  list-style-type: none;
+  margin: 0;
+  width: inherit;
+  padding: 10px;
+}
+
+.nav ul li {
+  cursor: pointer;
+  padding: 10px;
+  color: black;
+  border-top: 0.5px solid black;
+  border-bottom: 0.5px solid lightgrey;
+  border-radius: 1px;
+}
+
+.nav ul li:hover {
+  background-color: #575757;
+  color: white;
+}
+
+.sub-body {
+  flex: 1; /* Takes remaining space */
+  padding: 20px;
+  background-color: white;
+  height: 100%; /* Full height of the main container */
+  overflow-y: auto; /* Scrollable if content overflows */
+}
+
+.footer {
+  background-color: #222;
+  color: white;
+  text-align: center;
+  padding: 10px 0;
+}
+
+@media (min-width: 768px) {
+  .main-container {
+    flex-direction: row;
+  }
+
+  .nav {
+    flex: 1;
+    max-width: 200px;
+  }
+
+  .sub-body {
+    flex: 3;
+  }
+}

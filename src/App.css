@@ -1,0 +1,18 @@
+.App {
+  height: inherit;
+  width: inherit;
+  background-image: url("https://st2.depositphotos.com/1561359/12344/v/950/depositphotos_123444512-stock-illustration-appointment-word-marked.jpg");
+  background-size: cover;
+  background-position: center;
+  font-family: "Roboto";
+}
+
+.error {
+  color: red;
+  font-size: 14px;
+}
+
+button:focus {
+  outline: none;
+  box-shadow: none;
+}
