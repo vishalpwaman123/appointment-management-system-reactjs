@@ -43,18 +43,13 @@ function SignIn() {
           values: initialValues,
         });
         if (res.data.isSuccess && res.data.data) {
-          if (res.data.data.role === "CUSTOMER") {
-            //CUSTOMER
-            localStorage.setItem("C-USERID", res.data.data.id);
-            localStorage.setItem("C-USERNAME", res.data.data.userName);
-            localStorage.setItem("C-TOKEN", res.data.token);
-            window.location = "/UserDashboard";
-          } else {
-            //ADMIN
-            localStorage.setItem("A-USERID", res.data.data.id);
-            localStorage.setItem("A-TOKEN", res.data.token);
-            window.location = "/AdminDashboard";
-          }
+          //CUSTOMER
+          Object.entries({
+            "C-USERID": res.data.data.id,
+            "C-EMAIL": res.data.data.email,
+            "C-TOKEN": res.data.token,
+          }).forEach(([key, value]) => localStorage.setItem(key, value));
+          window.location = "/UserDashboard";
         }
       })
       .catch((error) => {
@@ -141,16 +136,7 @@ function SignIn() {
                   />
                 </div>
                 <button
-                  className="btn float-left mt-5 text-primary"
-                  type="submit"
-                  onClick={() => {
-                    navigate("/SignUp");
-                  }}
-                >
-                  Sign Up
-                </button>
-                <button
-                  className="btn btn-primary float-right mt-5"
+                  className="btn btn-primary w-100 mt-4"
                   type="submit"
                   disabled={!formik.isValid}
                 >

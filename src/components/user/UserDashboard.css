@@ -120,3 +120,11 @@ button:focus {
     flex: 3;
   }
 }
+
+.red {
+  color: red;
+}
+
+.green {
+  color: #4caf50;
+}

@@ -1,4 +1,5 @@
-import React, { forwardRef } from "react";
+import React, { forwardRef, useImperativeHandle, useRef } from "react";
+import "./UserDashboard.css";
 import CustomerServices from "../../services/CustomerServices";
 import Button from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
@@ -37,37 +38,42 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 const UserHome = forwardRef((props, ref) => {
   const [rows, setRows] = React.useState([]);
-
   const [openSnackbar, setOpenSnackbar] = React.useState(false);
   const [snachbarMessage, setSnackbarMessage] = React.useState("");
 
-  const GetPostByUserId = () => {
+  React.useEffect(() => {
+    GetAppointmentList();
+  }, []);
+
+  const GetAppointmentList = () => {
     let userId = Number(localStorage.getItem("C-USERID"));
     customerServices
-      .GetPostByUserId(userId)
+      .GetAppointmentList(userId)
       .then((res) => {
-        console.log(res);
-        setRows(res.data.data);
+        // debugger;
+        console.log(res.data.list);
+        setRows(res.data.list);
       })
       .catch((err) => {
         console.log(err);
       });
   };
 
-  const onUpdateSubmit = (value, { resetForm }) => {
-    console.log(value);
-    const formData = new FormData();
-    formData.append("Id", value.id);
-    formData.append("Title", value.title);
-    formData.append("File", value.file);
-    debugger;
+  useImperativeHandle(ref, () => ({
+    GetAppointmentListFunction() {
+      console.log("Child function called!");
+      GetAppointmentList();
+    },
+  }));
+
+  const cancelAppointment = (id) => {
     customerServices
-      .UpdatePost(formData)
+      .CancelAppointment(id)
       .then((res) => {
         console.log(res.data);
         setOpenSnackbar(true);
         setSnackbarMessage(res.data.message);
-        GetPostByUserId();
+        GetAppointmentList();
       })
       .catch((err) => {
         console.log(err);
@@ -108,35 +114,57 @@ const UserHome = forwardRef((props, ref) => {
                 <StyledTableCell>Name</StyledTableCell>
                 <StyledTableCell align="right">Phone</StyledTableCell>
                 <StyledTableCell align="right">Address</StyledTableCell>
-                <StyledTableCell align="right">Date & time</StyledTableCell>
+                <StyledTableCell align="right">Date / Time</StyledTableCell>
+                <StyledTableCell align="right">Status</StyledTableCell>
                 <StyledTableCell align="right"></StyledTableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map(function (row, index) {
-                console.log(row);
-                return (
-                  <React.Fragment>
-                    <StyledTableRow key={row.id}>
-                      <StyledTableCell component="th" scope="row">
-                        {row.name}
-                      </StyledTableCell>
-                      <StyledTableCell align="right">
-                        {row.phone}
-                      </StyledTableCell>
-                      <StyledTableCell align="right">
-                        {row.address}
-                      </StyledTableCell>
-                      <StyledTableCell align="right">
-                        {row.date + " " + row.time}
-                      </StyledTableCell>
-                      <StyledTableCell align="right">
-                        <button className="btn btn-dark">Cancel</button>
-                      </StyledTableCell>
-                    </StyledTableRow>
-                  </React.Fragment>
-                );
-              })}
+              {Array.isArray(rows) &&
+                rows.length > 0 &&
+                rows.map(function (row, index) {
+                  console.log(row);
+                  return (
+                    <React.Fragment>
+                      <StyledTableRow key={index}>
+                        <StyledTableCell component="th" scope="row">
+                          {row.name}
+                        </StyledTableCell>
+                        <StyledTableCell align="right">
+                          {row.phone}
+                        </StyledTableCell>
+                        <StyledTableCell align="right">
+                          {row.address}
+                        </StyledTableCell>
+                        <StyledTableCell align="right">
+                          {row.date + " / " + row.time}
+                        </StyledTableCell>
+                        <StyledTableCell
+                          align="right"
+                          style={
+                            row.status === "CANCEL"
+                              ? { color: "red" }
+                              : { color: "green" }
+                          }
+                        >
+                          {row.status}
+                        </StyledTableCell>
+                        <StyledTableCell align="right">
+                          {row.status !== "CANCEL" && (
+                            <button
+                              className="btn btn-dark"
+                              onClick={() => {
+                                cancelAppointment(row.id);
+                              }}
+                            >
+                              Cancel
+                            </button>
+                          )}
+                        </StyledTableCell>
+                      </StyledTableRow>
+                    </React.Fragment>
+                  );
+                })}
             </TableBody>
           </Table>
         </TableContainer>

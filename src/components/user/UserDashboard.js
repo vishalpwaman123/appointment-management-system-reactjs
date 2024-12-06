@@ -2,19 +2,22 @@ import React, { useRef } from "react";
 import "./UserDashboard.css";
 import CustomerServices from "../../services/CustomerServices";
 import UserHome from "./UserHome";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import SearchIcon from "@mui/icons-material/Search";
+import Popover from "@mui/material/Popover";
 import AddIcon from "@mui/icons-material/Add";
 import Modal from "react-bootstrap/Modal";
 import Button from "@mui/material/Button";
 import * as Yup from "yup";
 import { Formik, Form, Field, ErrorMessage } from "formik";
+import IconButton from "@mui/material/IconButton";
 
 const initialValues = {
+  userId: Number(localStorage.getItem("C-USERID")),
   name: "",
   phone: "",
   address: "",
@@ -24,7 +27,12 @@ const initialValues = {
 
 const validationSchema = Yup.object({
   name: Yup.string().required("Name is required"),
-  phone: Yup.string().required("Phone is required"),
+  phone: Yup.string()
+    .required("Phone is required")
+    .matches(
+      /^[1-9][0-9]{9}$/,
+      "Phone number must be exactly 10 digits and not start with 0"
+    ),
   address: Yup.string().required("Address is required"),
   date: Yup.date()
     .required("Appointment is required")
@@ -35,34 +43,54 @@ const validationSchema = Yup.object({
 const customerServices = new CustomerServices();
 
 export default function UserDashboard(props) {
+  const childRef = useRef();
   const [navItem, setNavItem] = React.useState("HOME");
-  const [_searchKeyword, setSearchKeyword] = React.useState("");
   const [modalShow, setModalShow] = React.useState(false);
   const [openSnackbar, setOpenSnackbar] = React.useState(false);
   const [snachbarMessage, setSnackbarMessage] = React.useState("");
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
+  React.useEffect(() => {
+    if (!localStorage.getItem("C-USERID") || !localStorage.getItem("C-TOKEN"))
+      window.location = "/";
+  });
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+  const id = open ? "simple-popover" : undefined;
 
   const handleBody = () => {
-    if (navItem.includes("HOME")) return <UserHome />;
+    if (navItem.includes("HOME")) return <UserHome ref={childRef} />;
     else handleLogout();
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("C-USERID");
-    localStorage.removeItem("C-TOKEN");
+    ["C-USERID", "C-EMAIL", "C-TOKEN"].forEach((key) =>
+      localStorage.removeItem(key)
+    );
     window.location = "/";
   };
 
   const onSubmit = (value, { resetForm }) => {
     console.log(value);
+    value.time = `2000-01-01T${value.time}:00`;
+    value.phone = value.phone.toString();
 
     customerServices
-      .AddPost(value)
+      .AddAppointment(value)
       .then((res) => {
         console.log(res.data);
         setModalShow(false);
         setOpenSnackbar(true);
         setSnackbarMessage(res.data.message);
-        // GetPostByUserId();
+        childRef.current.GetAppointmentListFunction();
       })
       .catch((err) => {
         console.log(err);
@@ -74,6 +102,27 @@ export default function UserDashboard(props) {
       <header className="header">
         <AppBar component="nav" className="position-static" id="Appbar">
           <Toolbar>
+            <IconButton
+              aria-describedby={id}
+              variant="contained"
+              onMouseOver={handleClick}
+            >
+              <AccountCircleIcon style={{ color: "white" }} />
+            </IconButton>
+            <Popover
+              id={id}
+              open={open}
+              anchorEl={anchorEl}
+              onClose={handleClose}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "left",
+              }}
+            >
+              <Typography sx={{ p: 2 }}>
+                {localStorage.getItem("C-EMAIL")}
+              </Typography>
+            </Popover>
             <Typography
               variant="h6"
               component="div"
@@ -115,7 +164,12 @@ export default function UserDashboard(props) {
               <AddIcon /> New
             </button>
           </lib>
-          <li className="mt-3">
+          <li
+            className="mt-3"
+            onClick={() => {
+              childRef.current.GetAppointmentListFunction();
+            }}
+          >
             Today
             <ArrowForwardIosIcon style={{ marginLeft: 100, fontSize: 12 }} />
           </li>
@@ -194,7 +248,7 @@ export default function UserDashboard(props) {
                               Phone *
                             </label>
                             <Field
-                              type="text"
+                              type="number"
                               className="form-control"
                               id="phone"
                               name="phone"
